@@ -220,16 +220,43 @@ function instantPeopleItems(): FeedItem[] {
   }));
 }
 
+function instantVideoItems(): FeedItem[] {
+  return [
+    {
+      id: makeId('instant-video-lion'),
+      url: 'https://upload.wikimedia.org/wikipedia/commons/transcoded/4/46/African_Lion_funny_video.webm/African_Lion_funny_video.webm.240p.vp9.webm',
+      poster: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/African_Lion_funny_video.webm/960px--African_Lion_funny_video.webm.jpg',
+      kind: 'other', mediaKind: 'video', caption: 'the lion would like to revise that decision',
+      source: { name: 'Wikimedia Commons', url: 'https://commons.wikimedia.org/wiki/File:African_Lion_funny_video.webm' },
+    },
+    {
+      id: makeId('instant-video-chameleon'),
+      url: 'https://upload.wikimedia.org/wikipedia/commons/transcoded/2/2a/My_Chameleon_is_funny.webm/My_Chameleon_is_funny.webm.240p.vp9.webm',
+      poster: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/My_Chameleon_is_funny.webm/500px--My_Chameleon_is_funny.webm.jpg',
+      kind: 'other', mediaKind: 'video', caption: 'chameleon performs one confusing little task',
+      source: { name: 'Wikimedia Commons', url: 'https://commons.wikimedia.org/wiki/File:My_Chameleon_is_funny.webm' },
+    },
+    {
+      id: makeId('instant-video-workout'),
+      url: 'https://upload.wikimedia.org/wikipedia/commons/transcoded/d/d0/Animals_Workout_Mix_II_Funny_Animals_Working_Out_Compilation_II_Extreme_Pets_tv_show.webm/Animals_Workout_Mix_II_Funny_Animals_Working_Out_Compilation_II_Extreme_Pets_tv_show.webm.240p.vp9.webm',
+      poster: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Animals_Workout_Mix_II_Funny_Animals_Working_Out_Compilation_II_Extreme_Pets_tv_show.webm/500px--Animals_Workout_Mix_II_Funny_Animals_Working_Out_Compilation_II_Extreme_Pets_tv_show.webm.jpg',
+      kind: 'other', mediaKind: 'video', caption: 'the workout plan has become extremely personal',
+      source: { name: 'Wikimedia Commons', url: 'https://commons.wikimedia.org/wiki/File:Animals_Workout_Mix_II_Funny_Animals_Working_Out_Compilation_II_Extreme_Pets_tv_show.webm' },
+    },
+  ];
+}
+
 export function instantCreatureItems(filter: FeedFilter): FeedItem[] {
   const cats = cataasItems();
   const dogs = instantDogItems();
   const others = instantOtherItems();
   const people = instantPeopleItems();
+  const videos = instantVideoItems();
   if (filter === 'cat') return cats;
   if (filter === 'dog') return dogs;
-  if (filter === 'other') return others;
+  if (filter === 'other') return [...others, ...videos];
   if (filter === 'people') return people;
-  return [cats[0], people[0], others[0], dogs[0], cats[1], people[1], others[1], dogs[1], ...cats.slice(2), ...people.slice(2), ...others.slice(2), ...dogs.slice(2)];
+  return [cats[0], people[0], others[0], dogs[0], cats[1], people[1], others[1], dogs[1], ...cats.slice(2), ...people.slice(2), ...others.slice(2), ...dogs.slice(2), ...videos];
 }
 
 const COMMONS_CATEGORIES: Record<AnimalKind, string[]> = {
