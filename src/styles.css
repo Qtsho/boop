@@ -1315,11 +1315,11 @@ html {
 }
 
 .card-heading h2 {
-  max-width: 22ch;
-  margin: 5px 0 6px;
+  max-width: 28ch;
+  margin: 3px 0 4px;
   color: #fffefb;
-  font-size: clamp(1.25rem, 2.4vw, 1.9rem);
-  line-height: 1.04;
+  font-size: clamp(0.95rem, 1.45vw, 1.2rem);
+  line-height: 1.08;
   text-wrap: balance;
   text-shadow: 0 2px 18px rgba(0, 0, 0, 0.38);
 }
@@ -1327,13 +1327,13 @@ html {
 .media-label {
   color: #ffd3ce;
   font-family: var(--display);
-  font-size: 0.67rem;
+  font-size: 0.54rem;
   font-weight: 850;
 }
 
 .card-copy .source-link {
-  color: rgba(255, 255, 255, 0.78);
-  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 0.5rem;
   font-weight: 680;
 }
 
@@ -1495,15 +1495,15 @@ html {
   }
 
   .card-heading h2 {
-    max-width: 20ch;
-    margin-bottom: 5px;
-    font-size: 1.15rem;
-    line-height: 1.08;
+    max-width: 26ch;
+    margin-bottom: 3px;
+    font-size: 0.9rem;
+    line-height: 1.1;
   }
 
   .media-label,
   .card-copy .source-link {
-    font-size: 0.62rem;
+    font-size: 0.48rem;
   }
 
   .card-actions {

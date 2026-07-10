@@ -52,7 +52,7 @@ export function MediaCard({ item, index, active, booped, onActive, onOpen, onBoo
             muted
             loop
             playsInline
-            preload={index < 3 ? 'auto' : 'metadata'}
+            preload={active ? 'metadata' : 'none'}
             onError={() => onBroken(item)}
           />
         ) : (

@@ -18,12 +18,26 @@ const CAPTIONS: Record<AnimalKind, string[]> = {
     'wearing the good face today',
   ],
   other: [
+    'hamster has entered the spreadsheet',
+    'the cheeks contain classified materials',
+    'bunny.exe is responding beautifully',
+    'otterly unqualified for this position',
+    'red panda forgot the assignment',
+    'raccoon acquired one forbidden snack',
     'small citizen with a complicated hat',
     'the council has reached no decision',
     'built for one specific puddle',
     'a pocket-sized administrative error',
     'the creature has brought a leaf',
     'minding a very tiny business',
+  ],
+  people: [
+    'confidence arrived before the plan',
+    'this seemed easier in the group chat',
+    'a flawless execution of the wrong idea',
+    'the dignity has left the building',
+    'nobody rehearsed any part of this',
+    'the intrusive thought won politely',
   ],
 };
 
@@ -82,7 +96,7 @@ export function shuffled<T>(items: T[]): T[] {
   return copy;
 }
 
-function withTimeout<T>(promise: Promise<T>, milliseconds = 9000): Promise<T> {
+function withTimeout<T>(promise: Promise<T>, milliseconds = 4500): Promise<T> {
   return Promise.race([
     promise,
     new Promise<T>((_, reject) => {
@@ -158,30 +172,71 @@ async function fetchDucks(): Promise<FeedItem[]> {
 
 function cataasItems(): FeedItem[] {
   const stamp = `${Date.now()}-${Math.random()}`;
-  return [
-    {
-      id: makeId('cataas'),
-      url: `https://cataas.com/cat?width=1200&height=900&t=${stamp}`,
+  return Array.from({ length: 6 }, (_, index): FeedItem => {
+    const gif = index < 3;
+    return {
+      id: makeId(gif ? 'cataas-gif' : 'cataas'),
+      url: `https://cataas.com/cat/${gif ? 'gif' : 'cute'}?width=720&height=960&t=${stamp}-${index}`,
       kind: 'cat',
-      mediaKind: 'image',
+      mediaKind: gif ? 'gif' : 'image',
       caption: captionFor('cat'),
       source: { name: 'Cat as a Service', url: 'https://cataas.com/' },
-    },
-    {
-      id: makeId('cataas-gif'),
-      url: `https://cataas.com/cat/gif?t=${stamp}-gif`,
-      kind: 'cat',
-      mediaKind: 'gif',
-      caption: captionFor('cat'),
-      source: { name: 'Cat as a Service', url: 'https://cataas.com/' },
-    },
-  ];
+    };
+  });
+}
+
+function instantOtherItems(): FeedItem[] {
+  const animals = ['hamster', 'bunny', 'otter', 'guinea-pig', 'red-panda', 'raccoon'];
+  return animals.map((animal, index) => ({
+    id: makeId(`instant-${animal}`),
+    url: `https://loremflickr.com/720/960/funny,${animal}?lock=${101 + index}`,
+    kind: 'other' as const,
+    mediaKind: 'image' as const,
+    caption: captionFor('other', index / animals.length),
+    source: { name: `Flickr ${animal.replace('-', ' ')}`, url: `https://www.flickr.com/search/?text=funny%20${animal}` },
+  }));
+}
+
+function instantDogItems(): FeedItem[] {
+  return Array.from({ length: 4 }, (_, index) => ({
+    id: makeId('instant-dog'),
+    url: `https://placedog.net/720/960?id=${20 + index}`,
+    kind: 'dog' as const,
+    mediaKind: 'image' as const,
+    caption: captionFor('dog', index / 4),
+    source: { name: 'PlaceDog', url: 'https://placedog.net/' },
+  }));
+}
+
+function instantPeopleItems(): FeedItem[] {
+  const moments = ['funny-people', 'people-laughing', 'silly-people', 'funny-fail'];
+  return moments.map((moment, index) => ({
+    id: makeId('instant-people'),
+    url: `https://loremflickr.com/720/960/${moment}?lock=${301 + index}`,
+    kind: 'people' as const,
+    mediaKind: 'image' as const,
+    caption: captionFor('people', index / moments.length),
+    source: { name: 'Flickr', url: `https://www.flickr.com/search/?text=${moment}` },
+  }));
+}
+
+export function instantCreatureItems(filter: FeedFilter): FeedItem[] {
+  const cats = cataasItems();
+  const dogs = instantDogItems();
+  const others = instantOtherItems();
+  const people = instantPeopleItems();
+  if (filter === 'cat') return cats;
+  if (filter === 'dog') return dogs;
+  if (filter === 'other') return others;
+  if (filter === 'people') return people;
+  return [cats[0], people[0], others[0], dogs[0], cats[1], people[1], others[1], dogs[1], ...cats.slice(2), ...people.slice(2), ...others.slice(2), ...dogs.slice(2)];
 }
 
 const COMMONS_CATEGORIES: Record<AnimalKind, string[]> = {
   cat: ['Category:Cats playing', 'Category:Animated GIFs of cats', 'Category:Videos of kittens'],
   dog: ['Category:Dogs playing', 'Category:Animated GIFs of dogs', 'Category:Videos of puppies'],
   other: ['Category:Animated GIFs of animals', 'Category:Animals playing', 'Category:Videos of ducks'],
+  people: ['Category:Videos of people laughing', 'Category:Animated GIFs of people', 'Category:People playing'],
 };
 
 async function fetchCommons(kind: AnimalKind): Promise<FeedItem[]> {
@@ -199,7 +254,7 @@ async function fetchCommons(kind: AnimalKind): Promise<FeedItem[]> {
     iiurlwidth: '1200',
   });
 
-  const response = await withTimeout(fetch(`https://commons.wikimedia.org/w/api.php?${params}`), 11000);
+  const response = await withTimeout(fetch(`https://commons.wikimedia.org/w/api.php?${params}`), 5000);
   if (!response.ok) throw new Error('Wikimedia Commons did not answer.');
   const data = (await response.json()) as CommonsResponse;
   const pages = Object.values(data.query?.pages ?? {});
@@ -244,6 +299,9 @@ export async function fetchCreatureBatch(filter: FeedFilter): Promise<FeedItem[]
   if (filter === 'everything' || filter === 'other') {
     jobs.push(fetchDucks(), fetchCommons('other'));
   }
+  if (filter === 'everything' || filter === 'people') {
+    jobs.push(fetchCommons('people'));
+  }
 
   const results = await Promise.allSettled(jobs);
   const liveItems = results.flatMap((result) => result.status === 'fulfilled' ? result.value : []);
@@ -251,17 +309,15 @@ export async function fetchCreatureBatch(filter: FeedFilter): Promise<FeedItem[]
   const unique = new Map<string, FeedItem>();
 
   shuffled([...liveItems, ...fallbackItems]).forEach((item) => {
-    const key = item.url.split('?')[0];
+    const key = item.url;
     if (!unique.has(key)) unique.set(key, item);
   });
 
-  const animatedItems = [...unique.values()].filter((item) => item.mediaKind !== 'image');
-  const animated = [
-    ...shuffled(animatedItems.filter((item) => item.source.name !== 'Wikimedia Commons')),
-    ...shuffled(animatedItems.filter((item) => item.source.name === 'Wikimedia Commons')),
-  ];
+  const gifs = shuffled([...unique.values()].filter((item) => item.mediaKind === 'gif'));
+  const videos = shuffled([...unique.values()].filter((item) => item.mediaKind === 'video'));
   const stills = shuffled([...unique.values()].filter((item) => item.mediaKind === 'image'));
-  const mixed = animated.flatMap((item, index) => [item, stills[index]]).filter(Boolean) as FeedItem[];
+  const mixed = gifs.flatMap((item, index) => [item, stills[index]]).filter(Boolean) as FeedItem[];
+  mixed.push(...stills.filter((item) => !mixed.includes(item)), ...videos);
   const remaining = [...unique.values()].filter((item) => !mixed.includes(item));
-  return [...mixed, ...shuffled(remaining)].slice(0, filter === 'everything' ? 20 : 14);
+  return [...mixed, ...shuffled(remaining)].slice(0, filter === 'everything' ? 28 : 18);
 }

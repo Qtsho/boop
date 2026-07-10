@@ -1,4 +1,4 @@
-export type AnimalKind = 'cat' | 'dog' | 'other';
+export type AnimalKind = 'cat' | 'dog' | 'other' | 'people';
 export type FeedFilter = 'everything' | AnimalKind;
 export type MediaKind = 'image' | 'gif' | 'video';
 

@@ -12,7 +12,7 @@ import {
 import { MediaCard } from './components/MediaCard';
 import { UploadDialog } from './components/UploadDialog';
 import { Viewer } from './components/Viewer';
-import { fetchCreatureBatch, mediaKindFromMime } from './lib/feed';
+import { fetchCreatureBatch, instantCreatureItems, mediaKindFromMime } from './lib/feed';
 import { loadCreatures } from './lib/localCreatures';
 import { playTinyChime } from './lib/sound';
 import type { FeedFilter, FeedItem, StoredCreature } from './types';
@@ -22,6 +22,7 @@ const FILTERS: Array<{ value: FeedFilter; label: string }> = [
   { value: 'cat', label: 'cats' },
   { value: 'dog', label: 'dogs' },
   { value: 'other', label: 'other little guys' },
+  { value: 'people', label: 'people being people' },
 ];
 
 const CUTE_FEEDBACK = [
@@ -36,7 +37,7 @@ const CUTE_FEEDBACK = [
 function deduplicate(items: FeedItem[]): FeedItem[] {
   const seen = new Set<string>();
   return items.filter((item) => {
-    const key = item.local ? item.id : item.url.split('?')[0];
+    const key = item.local ? item.id : item.url;
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
@@ -129,7 +130,7 @@ export default function App() {
   useEffect(() => {
     activeFilterRef.current = filter;
     const matchingLocal = filter === 'everything' ? localItems : localItems.filter((item) => item.kind === filter);
-    setItems(matchingLocal);
+    setItems(deduplicate([...matchingLocal, ...instantCreatureItems(filter)]));
     void requestBatch(filter, false);
   }, [filter, localItems, requestBatch]);
 
@@ -275,8 +276,8 @@ export default function App() {
         <section className="feed-wrap" aria-labelledby="feed-title">
           <div className="feed-intro">
             <div>
-              <h1 id="feed-title">tiny creatures forever</h1>
-              <p>Open the link. Scroll the animals. That is the whole thing.</p>
+              <h1 id="feed-title">laugh forever</h1>
+              <p>Open the link. Swipe the chaos. That is the whole thing.</p>
             </div>
             <span className="no-pressure"><PawPrint size={18} weight="fill" /> nothing to achieve here</span>
           </div>
